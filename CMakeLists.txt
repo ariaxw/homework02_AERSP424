@@ -15,11 +15,22 @@ message(STATUS "CMakeLists.txt is at ${PROJECT_SOURCE_DIR}")
 find_package(OpenGL REQUIRED)
 
 # Add GLEW
-set(GLEW_INCLUDE_DIR /opt/homebrew/Cellar/glew/2.2.0_1/include)
-set(GLEW_LIBRARY /opt/homebrew/Cellar/glew/2.2.0_1/lib/libGLEW.dylib)
+find_package(GLEW QUIET)
+if(NOT GLEW_FOUND)
+    list(APPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/third_party/glew/install")
+    find_package(GLEW REQUIRED)
+endif()
 
-include_directories(${GLEW_INCLUDE_DIR})
-link_directories(/opt/homebrew/Cellar/glew/2.2.0_1/lib)
+if(NOT GLEW_FOUND)
+    # Fallback to manual search
+    find_path(GLEW_INCLUDE_DIR GL/glew.h)
+    find_library(GLEW_LIBRARY GLEW)
+    if(NOT GLEW_INCLUDE_DIR OR NOT GLEW_LIBRARY)
+        message(FATAL_ERROR "GLEW not found. Please ensure it is installed.")
+    endif()
+    include_directories(${GLEW_INCLUDE_DIR})
+endif()
+
 
 # Add GLFW
 list(APPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/third_party/glfw/install")
@@ -28,7 +39,7 @@ find_package(glfw3 REQUIRED)
 # Add Matplot++
 list(APPEND CMAKE_PREFIX_PATH "${PROJECT_SOURCE_DIR}/third_party/matplotplusplus/install")
 find_package(Matplot++ REQUIRED)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
+include(GNUInstallDirs)
 
 # Include directories
 include_directories(
@@ -50,7 +61,7 @@ add_executable(Question4 src/Question4.cpp)
 target_link_libraries(Question4 OpenGL::GL glfw ${GLEW_LIBRARY} Matplot++::matplot pthread)
 
 # Install configuration
-set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)
 install(TARGETS Question1 Question2 Question3 Question4
     RUNTIME DESTINATION bin
 )
