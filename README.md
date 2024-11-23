@@ -58,7 +58,7 @@ After installation, you can run each executable from the `bin` directory.
 
 1. Navigate to the project root:
     ```
-    cd /path/to/homework02_AERSP424
+    cd /path/to/homework02_AERSP424/build/install/bin
     ./bin/Question1
     ./bin/Question2
     ./bin/Question3
