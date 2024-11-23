@@ -86,6 +86,7 @@ public:
             return;
         }
 
+        // Extract x and y coordinates
         std::vector<double> x_coords;
         std::vector<double> y_coords;
         std::vector<double> times;
@@ -98,6 +99,7 @@ public:
 
         // Subplot 1
         matplot::subplot(2, 1, 1);
+        // Plot trajectory (x vs y)
         matplot::plot(x_coords, y_coords)->line_width(2).color("red");
         matplot::title("2D Trajectory");
         matplot::xlabel("X Position");
@@ -106,6 +108,7 @@ public:
 
         // Subplot 2
         matplot::subplot(2, 1, 2);
+        // Plot time series
         matplot::plot(times, x_coords)->line_width(2).color("blue");
         matplot::plot(times, y_coords)->line_width(2).color("green");
         matplot::title("Position vs Time");
@@ -117,14 +120,16 @@ public:
 };
 
 int main() {
+    // Part 1: Plot aerodynamics equation
     AerodynamicsPlot aeroPlot;
     aeroPlot.plot();
     matplot::show();
 
+    // Part 2: Plot CSV data
     TrajectoryPlot trajPlot;
     if (trajPlot.loadCSV("trajectory_data.csv")) {
         trajPlot.plot();
-        matplot::show();
+        matplot::show(); // Display the plots
     }
 
     return 0;
