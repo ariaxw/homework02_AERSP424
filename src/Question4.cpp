@@ -7,10 +7,10 @@
 
 class AerodynamicsPlot {
 private:
-    static constexpr double PI = 3.14159265358979323846;
+    const double PI = 3.14159265358979323846;
 
     // Calculate lift coefficient
-    double calculateCL(double alpha, double CLalpha = 6.28318530718) {
+    double calculateCL(double alpha, double CLalpha = 2 * PI) {
         double alphaRad = alpha * PI / 180.0;
         return CLalpha * sin(alphaRad);
     }
@@ -22,21 +22,32 @@ public:
         // Generate data points
         std::vector<double> alpha = linspace(-20, 20, 200);
         std::vector<double> cl;
-
+        
+        // Calculate CL for each angle of attack
         for (const auto& a : alpha) {
             cl.push_back(calculateCL(a));
         }
 
-        // Create plot
-        matplot::plot(alpha, cl)->line_width(2).color("blue");
-        matplot::title("Lift Coefficient vs Angle of Attack");
-        matplot::xlabel("Angle of Attack (degrees)");
-        matplot::ylabel("Lift Coefficient (CL)");
-        matplot::grid(true);
+        // Create the plot
+        figure();
+        plot(alpha, cl)->line_width(2).color("blue");
+        
+        // Customize the plot
+        title("Lift Coefficient vs Angle of Attack");
+        xlabel("Angle of Attack (degrees)");
+        ylabel("Lift Coefficient (CL)");
+        grid(on);
+        
+        // Add a horizontal line at CL = 0
+        auto h = horline(0);
+        h->line_style("--").color({0.5, 0.5, 0.5});
+        
+        // Add a vertical line at alpha = 0
+        auto v = verline(0);
+        v->line_style("--").color({0.5, 0.5, 0.5});
 
-        // Add lines
-        matplot::plot(std::vector<double>{-20, 20}, std::vector<double>{0, 0}, "--")->color({0.5, 0.5, 0.5});
-        matplot::plot(std::vector<double>{0, 0}, std::vector<double>{-1, 1}, "--")->color({0.5, 0.5, 0.5});
+        // Optional: Save the plot
+        // save("lift_coefficient.png");
     }
 };
 
@@ -58,8 +69,10 @@ public:
         }
 
         std::string line;
+        // Skip header
         std::getline(file, line);
 
+        // Read data
         while (std::getline(file, line)) {
             std::stringstream ss(line);
             std::string value;
@@ -97,25 +110,35 @@ public:
             y_coords.push_back(point.y);
         }
 
-        // Subplot 1
-        matplot::subplot(2, 1, 1);
+        // Create figure with subplots
+        figure();
+        subplot(2, 1, 1);
+        
         // Plot trajectory (x vs y)
-        matplot::plot(x_coords, y_coords)->line_width(2).color("red");
-        matplot::title("2D Trajectory");
-        matplot::xlabel("X Position");
-        matplot::ylabel("Y Position");
-        matplot::grid(true);
+        plot(x_coords, y_coords)->line_width(2).color("red");
+        title("2D Trajectory");
+        xlabel("X Position");
+        ylabel("Y Position");
+        grid(on);
 
-        // Subplot 2
-        matplot::subplot(2, 1, 2);
         // Plot time series
-        matplot::plot(times, x_coords)->line_width(2).color("blue");
-        matplot::plot(times, y_coords)->line_width(2).color("green");
-        matplot::title("Position vs Time");
-        matplot::xlabel("Time");
-        matplot::ylabel("Position");
-        matplot::grid(true);
-        matplot::legend(std::vector<std::string>{"X Position", "Y Position"});
+        subplot(2, 1, 2);
+        auto p1 = plot(times, x_coords);
+        hold(on);
+        auto p2 = plot(times, y_coords);
+        hold(off);
+        
+        p1->line_width(2).color("blue");
+        p2->line_width(2).color("green");
+        
+        title("Position vs Time");
+        xlabel("Time");
+        ylabel("Position");
+        grid(on);
+        legend({"X Position", "Y Position"});
+
+        // Optional: Save the plots
+        // save("trajectory_plots.png");
     }
 };
 
@@ -123,7 +146,7 @@ int main() {
     // Part 1: Plot aerodynamics equation
     AerodynamicsPlot aeroPlot;
     aeroPlot.plot();
-    matplot::show();
+    matplot::show(); // Display the plot
 
     // Part 2: Plot CSV data
     TrajectoryPlot trajPlot;
@@ -134,4 +157,3 @@ int main() {
 
     return 0;
 }
-
